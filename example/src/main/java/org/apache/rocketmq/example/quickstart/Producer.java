@@ -16,6 +16,7 @@
  */
 package org.apache.rocketmq.example.quickstart;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -33,6 +34,7 @@ public class Producer {
          */
         DefaultMQProducer producer = new DefaultMQProducer("please_rename_unique_group_name");
 
+        producer.setNamesrvAddr("127.0.0.1:9876");
         /*
          * Specify name server addresses.
          * <p/>
@@ -50,7 +52,7 @@ public class Producer {
          */
         producer.start();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1; i++) {
             try {
 
                 /*
@@ -58,7 +60,7 @@ public class Producer {
                  */
                 Message msg = new Message("TopicTest" /* Topic */,
                     "TagA" /* Tag */,
-                    ("Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
+                        (JSONObject.toJSONString(new Person("xushu", 18))).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
                 );
 
                 /*
@@ -77,5 +79,32 @@ public class Producer {
          * Shut down once the producer instance is not longer in use.
          */
         producer.shutdown();
+    }
+
+
+    static class Person{
+        String name;
+        Integer age;
+
+        public Person(String name, Integer age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
     }
 }

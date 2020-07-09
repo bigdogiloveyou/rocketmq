@@ -41,6 +41,10 @@ import org.apache.rocketmq.store.config.FlushDiskType;
 import org.apache.rocketmq.store.util.LibC;
 import sun.nio.ch.DirectBuffer;
 
+
+/**
+ * <内存，file> 的结构，主要是通过 MappedByteBuffer 来实现
+ */
 public class MappedFile extends ReferenceResource {
     public static final int OS_PAGE_SIZE = 1024 * 4;
     protected static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -55,6 +59,8 @@ public class MappedFile extends ReferenceResource {
     protected FileChannel fileChannel;
     /**
      * Message will put to here first, and then reput to FileChannel if writeBuffer is not null.
+     *
+     * 消息首先会放到这边，如果 writeBuffer 不为空的话随后放到 FileChannel
      */
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;

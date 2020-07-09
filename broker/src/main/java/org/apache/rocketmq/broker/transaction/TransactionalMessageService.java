@@ -22,10 +22,15 @@ import org.apache.rocketmq.store.MessageExtBrokerInner;
 import org.apache.rocketmq.store.PutMessageResult;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * 事务消息服务
+ */
 public interface TransactionalMessageService {
 
     /**
      * Process prepare message, in common, we should put this message to storage service.
+     *
+     * 处理准备消息，通常，我们应该将此消息放入存储服务。
      *
      * @param messageInner Prepare(Half) message.
      * @return Prepare message storage result.
@@ -35,6 +40,8 @@ public interface TransactionalMessageService {
     /**
      * Process prepare message in async manner, we should put this message to storage service
      *
+     * 在异步管理器中处理消息
+     *
      * @param messageInner Prepare(Half) message.
      * @return CompletableFuture of put result, will be completed at put success(flush and replica done)
      */
@@ -43,12 +50,16 @@ public interface TransactionalMessageService {
     /**
      * Delete prepare message when this message has been committed or rolled back.
      *
+     * 当消息提交或者回滚的时候，删除准备消息
+     *
      * @param messageExt
      */
     boolean deletePrepareMessage(MessageExt messageExt);
 
     /**
      * Invoked to process commit prepare message.
+     *
+     * 提交消息
      *
      * @param requestHeader Commit message request header.
      * @return Operate result contains prepare message and relative error code.
@@ -58,6 +69,8 @@ public interface TransactionalMessageService {
     /**
      * Invoked to roll back prepare message.
      *
+     * 回滚消息
+     *
      * @param requestHeader Prepare message request header.
      * @return Operate result contains prepare message and relative error code.
      */
@@ -66,6 +79,8 @@ public interface TransactionalMessageService {
     /**
      * Traverse uncommitted/unroll back half message and send check back request to producer to obtain transaction
      * status.
+     *
+     * 遍历未提交/回滚消息，并将回签请求发送给生产者以获取交易状态。
      *
      * @param transactionTimeout The minimum time of the transactional message to be checked firstly, one message only
      * exceed this time interval that can be checked.
@@ -79,12 +94,16 @@ public interface TransactionalMessageService {
     /**
      * Open transaction service.
      *
+     * 打开事务服务
+     *
      * @return If open success, return true.
      */
     boolean open();
 
     /**
      * Close transaction service.
+     *
+     * 关闭事务服务
      */
     void close();
 }

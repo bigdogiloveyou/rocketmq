@@ -68,6 +68,14 @@ public class NamesrvStartup {
         return null;
     }
 
+
+    /**
+     * 创建 nameserver 控制器
+     * @param args jvm 运行时输入参数
+     * @return
+     * @throws IOException
+     * @throws JoranException
+     */
     public static NamesrvController createNamesrvController(String[] args) throws IOException, JoranException {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         //PackageConflictDetect.detectFastjson();
@@ -79,6 +87,7 @@ public class NamesrvStartup {
             return null;
         }
 
+        // 创建 nameserverConfig、nettyServerConfig
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
         nettyServerConfig.setListenPort(9876);
@@ -107,6 +116,8 @@ public class NamesrvStartup {
 
         MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
 
+        // 自己加的
+        namesrvConfig.setRocketmqHome("/Users/xushu/Github OpenSource/rocketmq/distribution");
         if (null == namesrvConfig.getRocketmqHome()) {
             System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
             System.exit(-2);
@@ -123,6 +134,8 @@ public class NamesrvStartup {
         MixAll.printObjectProperties(log, namesrvConfig);
         MixAll.printObjectProperties(log, nettyServerConfig);
 
+
+        // 创建 nameserver 控制器
         final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
         // remember all configs to prevent discard
@@ -131,18 +144,27 @@ public class NamesrvStartup {
         return controller;
     }
 
+
+    /**
+     * 启动 broker 控制器
+     * @param controller broker 控制器
+     * @return
+     * @throws Exception
+     */
     public static NamesrvController start(final NamesrvController controller) throws Exception {
 
         if (null == controller) {
             throw new IllegalArgumentException("NamesrvController is null");
         }
 
+        // 初始化 broker
         boolean initResult = controller.initialize();
         if (!initResult) {
             controller.shutdown();
             System.exit(-3);
         }
 
+        // 加上关闭钩子，因为需要一连串的关闭操作
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -151,6 +173,8 @@ public class NamesrvStartup {
             }
         }));
 
+
+        // 启动
         controller.start();
 
         return controller;

@@ -426,6 +426,9 @@ public class RouteInfoManager {
         return null;
     }
 
+    /**
+     * 扫描没有在指定心跳更新的 broker，移除掉
+     */
     public void scanNotActiveBroker() {
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -750,57 +753,78 @@ public class RouteInfoManager {
 
         return topicList.encode();
     }
-}
 
-class BrokerLiveInfo {
-    private long lastUpdateTimestamp;
-    private DataVersion dataVersion;
-    private Channel channel;
-    private String haServerAddr;
 
-    public BrokerLiveInfo(long lastUpdateTimestamp, DataVersion dataVersion, Channel channel,
-        String haServerAddr) {
-        this.lastUpdateTimestamp = lastUpdateTimestamp;
-        this.dataVersion = dataVersion;
-        this.channel = channel;
-        this.haServerAddr = haServerAddr;
-    }
 
-    public long getLastUpdateTimestamp() {
-        return lastUpdateTimestamp;
-    }
+    /**
+     * 我擅自把这 class 放入内部类里面，嘻嘻。
+     * 存活的 broker 信息
+     */
+    class BrokerLiveInfo {
+        /**
+         * 上次更新时间
+         */
+        private long lastUpdateTimestamp;
 
-    public void setLastUpdateTimestamp(long lastUpdateTimestamp) {
-        this.lastUpdateTimestamp = lastUpdateTimestamp;
-    }
+        /**
+         * 数据版本
+         */
+        private DataVersion dataVersion;
 
-    public DataVersion getDataVersion() {
-        return dataVersion;
-    }
+        /**
+         * channel
+         */
+        private Channel channel;
 
-    public void setDataVersion(DataVersion dataVersion) {
-        this.dataVersion = dataVersion;
-    }
+        /**
+         * HA server 地址
+         */
+        private String haServerAddr;
 
-    public Channel getChannel() {
-        return channel;
-    }
+        public BrokerLiveInfo(long lastUpdateTimestamp, DataVersion dataVersion, Channel channel,
+                              String haServerAddr) {
+            this.lastUpdateTimestamp = lastUpdateTimestamp;
+            this.dataVersion = dataVersion;
+            this.channel = channel;
+            this.haServerAddr = haServerAddr;
+        }
 
-    public void setChannel(Channel channel) {
-        this.channel = channel;
-    }
+        public long getLastUpdateTimestamp() {
+            return lastUpdateTimestamp;
+        }
 
-    public String getHaServerAddr() {
-        return haServerAddr;
-    }
+        public void setLastUpdateTimestamp(long lastUpdateTimestamp) {
+            this.lastUpdateTimestamp = lastUpdateTimestamp;
+        }
 
-    public void setHaServerAddr(String haServerAddr) {
-        this.haServerAddr = haServerAddr;
-    }
+        public DataVersion getDataVersion() {
+            return dataVersion;
+        }
 
-    @Override
-    public String toString() {
-        return "BrokerLiveInfo [lastUpdateTimestamp=" + lastUpdateTimestamp + ", dataVersion=" + dataVersion
-            + ", channel=" + channel + ", haServerAddr=" + haServerAddr + "]";
+        public void setDataVersion(DataVersion dataVersion) {
+            this.dataVersion = dataVersion;
+        }
+
+        public Channel getChannel() {
+            return channel;
+        }
+
+        public void setChannel(Channel channel) {
+            this.channel = channel;
+        }
+
+        public String getHaServerAddr() {
+            return haServerAddr;
+        }
+
+        public void setHaServerAddr(String haServerAddr) {
+            this.haServerAddr = haServerAddr;
+        }
+
+        @Override
+        public String toString() {
+            return "BrokerLiveInfo [lastUpdateTimestamp=" + lastUpdateTimestamp + ", dataVersion=" + dataVersion
+                    + ", channel=" + channel + ", haServerAddr=" + haServerAddr + "]";
+        }
     }
 }

@@ -25,6 +25,10 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 
+
+/**
+ * 消费 queue
+ */
 public class ConsumeQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
@@ -34,8 +38,13 @@ public class ConsumeQueue {
     private final DefaultMessageStore defaultMessageStore;
 
     private final MappedFileQueue mappedFileQueue;
+
+    // 主题
     private final String topic;
+
+    // queue id
     private final int queueId;
+
     private final ByteBuffer byteBufferIndex;
 
     private final String storePath;
@@ -50,21 +59,29 @@ public class ConsumeQueue {
         final String storePath,
         final int mappedFileSize,
         final DefaultMessageStore defaultMessageStore) {
+
+        // 存储路径：userhome/store/consumequeue
         this.storePath = storePath;
         this.mappedFileSize = mappedFileSize;
         this.defaultMessageStore = defaultMessageStore;
 
+        // 主题
         this.topic = topic;
+
+        // queueId
         this.queueId = queueId;
 
         String queueDir = this.storePath
             + File.separator + topic
             + File.separator + queueId;
 
+        // 比如 /Users/xushu/store/consumequeue/TopicTest/0，每个 queueId 都有多个文件
         this.mappedFileQueue = new MappedFileQueue(queueDir, mappedFileSize, null);
 
         this.byteBufferIndex = ByteBuffer.allocate(CQ_STORE_UNIT_SIZE);
 
+
+        // 开启了 ConsumeQueueExt 才使用
         if (defaultMessageStore.getMessageStoreConfig().isEnableConsumeQueueExt()) {
             this.consumeQueueExt = new ConsumeQueueExt(
                 topic,

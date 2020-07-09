@@ -21,11 +21,18 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 配置管理
+ */
 public abstract class ConfigManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
     public abstract String encode();
 
+    /**
+     * 从默认路径加载配置
+     * @return
+     */
     public boolean load() {
         String fileName = null;
         try {
@@ -67,6 +74,10 @@ public abstract class ConfigManager {
 
     public abstract void decode(final String jsonString);
 
+    /**
+     * 将 consumer offset/ consumer filter 存储到文件中，路径：userHome/store/config/consumerOffset.json
+     * 路径：userHome/store/config/consumerOffset.json
+     */
     public synchronized void persist() {
         String jsonString = this.encode(true);
         if (jsonString != null) {

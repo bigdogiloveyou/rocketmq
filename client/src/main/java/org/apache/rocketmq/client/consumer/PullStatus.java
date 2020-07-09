@@ -16,6 +16,9 @@
  */
 package org.apache.rocketmq.client.consumer;
 
+/**
+ * consumer 拉取消息结果
+ */
 public enum PullStatus {
     /**
      * Founded

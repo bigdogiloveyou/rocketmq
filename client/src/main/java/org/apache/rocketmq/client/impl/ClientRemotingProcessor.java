@@ -58,6 +58,10 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public class ClientRemotingProcessor extends AsyncNettyRequestProcessor implements NettyRequestProcessor {
     private final InternalLogger log = ClientLogger.getLog();
+
+    /**
+     * 进行远程通信类
+     */
     private final MQClientInstance mqClientFactory;
 
     public ClientRemotingProcessor(final MQClientInstance mqClientFactory) {

@@ -20,6 +20,10 @@ import java.util.List;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageQueue;
 
+
+/**
+ * 选择哪个 queue 发送信息，所以可能是针对于一个 topic 有4个 queue，或者默认有4个 queue？
+ */
 public interface MessageQueueSelector {
     MessageQueue select(final List<MessageQueue> mqs, final Message msg, final Object arg);
 }

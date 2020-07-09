@@ -27,11 +27,18 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.common.message.MessageQueue;
 
+/**
+ * 负载均衡锁管理器
+ */
 public class RebalanceLockManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.REBALANCE_LOCK_LOGGER_NAME);
+
+
     private final static long REBALANCE_LOCK_MAX_LIVE_TIME = Long.parseLong(System.getProperty(
         "rocketmq.broker.rebalance.lockMaxLiveTime", "60000"));
     private final Lock lock = new ReentrantLock();
+
+    /** 一个 group 中消息数量？ **/
     private final ConcurrentMap<String/* group */, ConcurrentHashMap<MessageQueue, LockEntry>> mqLockTable =
         new ConcurrentHashMap<String, ConcurrentHashMap<MessageQueue, LockEntry>>(1024);
 
@@ -97,6 +104,13 @@ public class RebalanceLockManager {
         return true;
     }
 
+    /**
+     * 查找有没有此 clientId
+     * @param group
+     * @param mq
+     * @param clientId
+     * @return
+     */
     private boolean isLocked(final String group, final MessageQueue mq, final String clientId) {
         ConcurrentHashMap<MessageQueue, LockEntry> groupValue = this.mqLockTable.get(group);
         if (groupValue != null) {
@@ -114,6 +128,13 @@ public class RebalanceLockManager {
         return false;
     }
 
+    /**
+     * 批量锁定
+     * @param group
+     * @param mqs
+     * @param clientId
+     * @return
+     */
     public Set<MessageQueue> tryLockBatch(final String group, final Set<MessageQueue> mqs,
         final String clientId) {
         Set<MessageQueue> lockedMqs = new HashSet<MessageQueue>(mqs.size());
@@ -127,6 +148,7 @@ public class RebalanceLockManager {
             }
         }
 
+        // 判断有没有，并且有没有过期
         if (!notLockedMqs.isEmpty()) {
             try {
                 this.lock.lockInterruptibly();
@@ -189,6 +211,13 @@ public class RebalanceLockManager {
         return lockedMqs;
     }
 
+
+    /**
+     * 批量解锁，先锁定再解锁，这样 list 就不会一直增长
+     * @param group
+     * @param mqs
+     * @param clientId
+     */
     public void unlockBatch(final String group, final Set<MessageQueue> mqs, final String clientId) {
         try {
             this.lock.lockInterruptibly();

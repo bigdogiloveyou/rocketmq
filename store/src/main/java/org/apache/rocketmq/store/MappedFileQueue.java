@@ -35,8 +35,14 @@ public class MappedFileQueue {
 
     private static final int DELETE_FILES_BATCH_MAX = 10;
 
+    /**
+     * 保存路径： userHome/store/commitlog
+     */
     private final String storePath;
 
+    /**
+     * 文件大小：1024MB = 1GB
+     */
     private final int mappedFileSize;
 
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
@@ -144,6 +150,11 @@ public class MappedFileQueue {
         }
     }
 
+
+    /**
+     * 加载 commit log 或者 consume queue
+     * @return
+     */
     public boolean load() {
         File dir = new File(this.storePath);
         File[] files = dir.listFiles();

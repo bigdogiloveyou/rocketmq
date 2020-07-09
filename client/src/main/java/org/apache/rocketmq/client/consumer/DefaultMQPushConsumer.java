@@ -59,6 +59,10 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  * <p>
  * <strong>Thread Safety:</strong> After initialization, the instance can be regarded as thread-safe.
  * </p>
+ *
+ * 注释的意思是说，DefaultMQPushConsumer 是值得推荐的 consumer client，所以 DefaultLitePullConsumer？
+ *
+ * 现在 MQ 的 consumer 就两个，一个是 DefaultMQPushConsumer，另一个是 DefaultLitePullConsumer
  */
 public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsumer {
 
@@ -66,6 +70,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     /**
      * Internal implementation. Most of the functions herein are delegated to it.
+     *
+     * 这边无论 provider 还是 consumer 都是外部套个壳，然后有内部的实际实现
      */
     protected final transient DefaultMQPushConsumerImpl defaultMQPushConsumerImpl;
 
@@ -89,6 +95,10 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * </p>
      *
      * This field defaults to clustering.
+     *
+     * 消息模型分为 clustering 和 broadcasting.
+     * clustering：同一个组的消费者只能消费已订阅的消息分片
+     * broadcasting：每一个消费者都能收到订阅的消息
      */
     private MessageModel messageModel = MessageModel.CLUSTERING;
 
@@ -122,6 +132,16 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * messages born prior to {@link #consumeTimestamp} will be ignored
      * </li>
      * </ul>
+     *
+     *
+     * 消费者启动后从哪里开始消费：
+     *          CONSUME_FROM_LAST_OFFSET：
+     *                  消费者在之前停止的地方进行消费。如果是新启动的消费者客户端，根据消费者 group 的年龄，有两种情况：
+     *                          1、如果最近才创建了消费组，则最早的订阅消息尚未到期，这意味着该消费组代表了最近启动的业务，消费将从一开始就开始；
+     *                          2、如果最早的已订阅消息已过期，则从最新消息开始消费，这意味着在启动时间戳之前生成的消息将被忽略。
+     *          CONSUME_FROM_FIRST_OFFSET：消费者会从最早的信息开始的时候开始消费
+     *
+     *          CONSUME_FROM_TIMESTAMP：从指定的时间点之后开始消费
      */
     private ConsumeFromWhere consumeFromWhere = ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET;
 
@@ -135,6 +155,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     /**
      * Queue allocation algorithm specifying how message queues are allocated to each consumer clients.
+     *
+     * 队列分配算法，指定如何将消息队列分配给每个 consumer 客户端使用
      */
     private AllocateMessageQueueStrategy allocateMessageQueueStrategy;
 
@@ -256,6 +278,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     /**
      * Interface of asynchronous transfer data
+     *
+     * 异步传输数据接口
      */
     private TraceDispatcher traceDispatcher = null;
 
@@ -721,6 +745,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
     /**
      * Register a callback to execute on message arrival for concurrent consuming.
      *
+     * 使用 listener 的方式消费消息
+     *
      * @param messageListener message handling callback.
      */
     @Override
@@ -743,9 +769,11 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
     /**
      * Subscribe a topic to consuming subscription.
      *
+     * sub 一个 topic。
+     *
      * @param topic topic to subscribe.
      * @param subExpression subscription expression.it only support or operation such as "tag1 || tag2 || tag3" <br>
-     * if null or * expression,meaning subscribe all
+     * if null or * expression,meaning subscribe all  选取某一个 topic 中的 tag
      * @throws MQClientException if there is any client error.
      */
     @Override

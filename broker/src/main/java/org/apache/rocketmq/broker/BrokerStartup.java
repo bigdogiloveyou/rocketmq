@@ -48,6 +48,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 
+/**
+ * broker 启动类
+ */
 public class BrokerStartup {
     public static Properties properties = null;
     public static CommandLine commandLine = null;
@@ -55,9 +58,18 @@ public class BrokerStartup {
     public static InternalLogger log;
 
     public static void main(String[] args) {
+        // 自己加的参数
+//        args = new String[] {"-n","127.0.0.1:9876","autoCreateTopicEnable=true"};
+        args = new String[] {"-n","127.0.0.1:9876"};
         start(createBrokerController(args));
     }
 
+
+    /**
+     * 启动 broker controller
+     * @param controller broker 控制器
+     * @return
+     */
     public static BrokerController start(BrokerController controller) {
         try {
 
@@ -87,6 +99,11 @@ public class BrokerStartup {
         }
     }
 
+    /**
+     * 创建 broker
+     * @param args jvm 运行输入参数
+     * @return
+     */
     public static BrokerController createBrokerController(String[] args) {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
 
@@ -114,8 +131,9 @@ public class BrokerStartup {
             nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE,
                 String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
             nettyServerConfig.setListenPort(10911);
-            final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
+            // 消息存储配置中得知自己的角色为 slave
+            final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
             if (BrokerRole.SLAVE == messageStoreConfig.getBrokerRole()) {
                 int ratio = messageStoreConfig.getAccessMessageInMemoryMaxRatio() - 10;
                 messageStoreConfig.setAccessMessageInMemoryMaxRatio(ratio);
@@ -142,6 +160,9 @@ public class BrokerStartup {
 
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), brokerConfig);
 
+
+            // 自己加的
+            brokerConfig.setRocketmqHome("/Users/xushu/Github OpenSource/rocketmq/distribution");
             if (null == brokerConfig.getRocketmqHome()) {
                 System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation", MixAll.ROCKETMQ_HOME_ENV);
                 System.exit(-2);
@@ -165,9 +186,11 @@ public class BrokerStartup {
             switch (messageStoreConfig.getBrokerRole()) {
                 case ASYNC_MASTER:
                 case SYNC_MASTER:
+                    // masterId 为0
                     brokerConfig.setBrokerId(MixAll.MASTER_ID);
                     break;
                 case SLAVE:
+                    // slaveId 大于0
                     if (brokerConfig.getBrokerId() <= 0) {
                         System.out.printf("Slave's brokerId must be > 0");
                         System.exit(-3);
@@ -211,6 +234,8 @@ public class BrokerStartup {
             MixAll.printObjectProperties(log, nettyClientConfig);
             MixAll.printObjectProperties(log, messageStoreConfig);
 
+
+            // 启动 broker 控制器，启动后，意味着 broker 能正式运行
             final BrokerController controller = new BrokerController(
                 brokerConfig,
                 nettyServerConfig,
@@ -218,13 +243,14 @@ public class BrokerStartup {
                 messageStoreConfig);
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
-
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();
                 System.exit(-3);
             }
 
+
+            // 创建一个 hook
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 private volatile boolean hasShutdown = false;
                 private AtomicInteger shutdownTimes = new AtomicInteger(0);

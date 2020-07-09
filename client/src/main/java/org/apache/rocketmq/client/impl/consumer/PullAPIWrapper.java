@@ -49,9 +49,17 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 import org.apache.rocketmq.common.sysflag.PullSysFlag;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 
+
+/**
+ * 简单的包装类，实际的消息消费操作由 MQClientInstance 完成
+ */
 public class PullAPIWrapper {
     private final InternalLogger log = ClientLogger.getLog();
+
+
     private final MQClientInstance mQClientFactory;
+
+
     private final String consumerGroup;
     private final boolean unitMode;
     private ConcurrentMap<MessageQueue, AtomicLong/* brokerId */> pullFromWhichNodeTable =
@@ -140,6 +148,27 @@ public class PullAPIWrapper {
         }
     }
 
+
+    /**
+     * 拉取消息核心方法
+     *
+     * @param mq 消息队列
+     * @param subExpression 订阅表达式
+     * @param subVersion 订阅版本号
+     * @param offset 拉取队列开始位置
+     * @param maxNums 拉取消息数量
+     * @param sysFlag 拉取请求系统标识
+      * @param commitOffset 提交消费进度
+      * @param brokerSuspendMaxTimeMillis broker挂起请求最大时间
+      * @param timeoutMillis 请求broker超时时长
+      * @param communicationMode 通讯模式
+      * @param pullCallback 拉取回调
+      * @return 拉取消息结果。只有通讯模式为同步时，才返回结果，否则返回null。
+      * @throws MQClientException 当寻找不到 broker 时，或发生其他client异常
+      * @throws RemotingException 当远程调用发生异常时
+      * @throws MQBrokerException 当 broker 发生异常时。只有通讯模式为同步时才会发生该异常。
+      * @throws InterruptedException 当发生中断异常时
+     **/
     public PullResult pullKernelImpl(
         final MessageQueue mq,
         final String subExpression,
@@ -197,6 +226,7 @@ public class PullAPIWrapper {
                 brokerAddr = computPullFromWhichFilterServer(mq.getTopic(), brokerAddr);
             }
 
+            // 拉取消息进行消费
             PullResult pullResult = this.mQClientFactory.getMQClientAPIImpl().pullMessage(
                 brokerAddr,
                 requestHeader,

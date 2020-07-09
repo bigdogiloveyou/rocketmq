@@ -40,9 +40,16 @@ public class IndexService {
      */
     private static final int MAX_TRY_IDX_CREATE = 3;
     private final DefaultMessageStore defaultMessageStore;
+
+
     private final int hashSlotNum;
     private final int indexNum;
+
+    /**
+     * 索引目录：userHome/store/index
+     */
     private final String storePath;
+
     private final ArrayList<IndexFile> indexFileList = new ArrayList<IndexFile>();
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -54,6 +61,12 @@ public class IndexService {
             StorePathConfigHelper.getStorePathIndex(store.getMessageStoreConfig().getStorePathRootDir());
     }
 
+
+    /**
+     * 加载索引
+     * @param lastExitOK 上次关闭是否是正常关闭
+     * @return
+     */
     public boolean load(final boolean lastExitOK) {
         File dir = new File(this.storePath);
         File[] files = dir.listFiles();
@@ -63,6 +76,8 @@ public class IndexService {
             for (File file : files) {
                 try {
                     IndexFile f = new IndexFile(file.getPath(), this.hashSlotNum, this.indexNum, 0, 0);
+
+                    // 加载索引
                     f.load();
 
                     if (!lastExitOK) {

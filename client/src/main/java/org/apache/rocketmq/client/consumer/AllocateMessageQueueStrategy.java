@@ -21,6 +21,9 @@ import org.apache.rocketmq.common.message.MessageQueue;
 
 /**
  * Strategy Algorithm for message allocating between consumers
+ *
+ * 消息消费队列在同一消费组不同消费者之间的负载均衡，其核心设计理念是在一个消息消费队列在同一时间只允许被同一消费组内的一个消费者消费，
+ * 一个消息消费者能同时消费多个消息队列。
  */
 public interface AllocateMessageQueueStrategy {
 

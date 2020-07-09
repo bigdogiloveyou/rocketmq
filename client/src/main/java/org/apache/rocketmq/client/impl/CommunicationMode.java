@@ -16,8 +16,24 @@
  */
 package org.apache.rocketmq.client.impl;
 
+/**
+ * 使用RocketMQ发送三种类型的消息：同步消息、异步消息和单向消息。
+ * 其中前两种消息是可靠的，因为会有发送是否成功的应答，最后一个只管发，不管是否成功。
+ */
 public enum CommunicationMode {
+
+    /**
+     * 同步
+     */
     SYNC,
+
+    /**
+     * 异步
+     */
     ASYNC,
+
+    /**
+     * 只管发
+     */
     ONEWAY,
 }

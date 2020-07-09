@@ -78,6 +78,13 @@ public class Validators {
         return matcher.matches();
     }
 
+
+    /**
+     * 对信息的 topic、body 进行校验
+     * @param msg
+     * @param defaultMQProducer
+     * @throws MQClientException
+     */
     public static void checkMessage(Message msg, DefaultMQProducer defaultMQProducer)
         throws MQClientException {
         if (null == msg) {

@@ -39,33 +39,72 @@ import org.apache.rocketmq.remoting.netty.TlsSystemConfig;
 import org.apache.rocketmq.srvutil.FileWatchService;
 
 
+/**
+ * 整个 NameServer 类
+ */
 public class NamesrvController {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
+    /**
+     * Namesrv 配置类
+     */
     private final NamesrvConfig namesrvConfig;
 
+    /**
+     * netty server 配置类
+     */
     private final NettyServerConfig nettyServerConfig;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
         "NSScheduledThread"));
+
+    /**
+     * kv 配置管理类
+     */
     private final KVConfigManager kvConfigManager;
+
+    /**
+     * 路由信息管理类
+     */
     private final RouteInfoManager routeInfoManager;
 
+    /**
+     * 远程通信 netty server
+     */
     private RemotingServer remotingServer;
 
+    /**
+     * broker 客房管理服务
+     */
     private BrokerHousekeepingService brokerHousekeepingService;
 
     private ExecutorService remotingExecutor;
 
     private Configuration configuration;
+
+    /**
+     * 文件监控服务
+     */
     private FileWatchService fileWatchService;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
+
+        // nameserver 配置
         this.namesrvConfig = namesrvConfig;
+
+        // nettyServer 配置
         this.nettyServerConfig = nettyServerConfig;
+
+        // kv 配置管理器
         this.kvConfigManager = new KVConfigManager(this);
+
+        // 路由管理器
         this.routeInfoManager = new RouteInfoManager();
+
+        // broker 客房管理服务
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);
+
+        // 配置
         this.configuration = new Configuration(
             log,
             this.namesrvConfig, this.nettyServerConfig
@@ -73,17 +112,26 @@ public class NamesrvController {
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 
+    /**
+     * 初始化 nameserver 控制器
+     * @return
+     */
     public boolean initialize() {
 
+        // 加载 kv 配置管理器
         this.kvConfigManager.load();
 
+        // 构造远程通信类
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
+
+        // 注册处理器
         this.registerProcessor();
 
+        // 扫描没有指定心跳时间内更新的 broker，然后移除
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -92,6 +140,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
+        // 打印所有配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -100,6 +149,7 @@ public class NamesrvController {
             }
         }, 1, 10, TimeUnit.MINUTES);
 
+        // 注册一个 listener 来重新加载 sslcontext
         if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
             // Register a listener to reload SslContext
             try {
@@ -141,6 +191,9 @@ public class NamesrvController {
         return true;
     }
 
+    /**
+     * 注册 processor
+     */
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
 
@@ -152,6 +205,10 @@ public class NamesrvController {
         }
     }
 
+    /**
+     * 启动 netty server、文件监控服务
+     * @throws Exception
+     */
     public void start() throws Exception {
         this.remotingServer.start();
 

@@ -20,10 +20,20 @@ package org.apache.rocketmq.remoting.netty;
 public class NettySystemConfig {
     public static final String COM_ROCKETMQ_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE =
         "com.rocketmq.remoting.nettyPooledByteBufAllocatorEnable";
+
+    /**
+     * socket send buffer 大小
+     */
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_SNDBUF_SIZE =
         "com.rocketmq.remoting.socket.sndbuf.size";
+
+    /**
+     * socket receive buffer 大小
+     */
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_RCVBUF_SIZE =
         "com.rocketmq.remoting.socket.rcvbuf.size";
+
+
     public static final String COM_ROCKETMQ_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE =
         "com.rocketmq.remoting.clientAsyncSemaphoreValue";
     public static final String COM_ROCKETMQ_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE =

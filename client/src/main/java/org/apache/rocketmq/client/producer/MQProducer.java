@@ -26,6 +26,10 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 
+
+/**
+ * producer 的一些接口，主要为 send
+ */
 public interface MQProducer extends MQAdmin {
     void start() throws MQClientException;
 

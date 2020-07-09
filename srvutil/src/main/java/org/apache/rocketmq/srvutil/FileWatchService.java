@@ -96,6 +96,9 @@ public class FileWatchService extends ServiceThread {
         return UtilAll.bytes2string(hash);
     }
 
+    /**
+     * 文件的 listener
+     */
     public interface Listener {
         /**
          * Will be called when the target files are changed

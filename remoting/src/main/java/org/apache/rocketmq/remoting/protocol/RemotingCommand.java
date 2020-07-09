@@ -31,10 +31,19 @@ import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 远程请求命令发送
+ */
 public class RemotingCommand {
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
+
+    /**
+     * 请求版本
+     */
     public static final String REMOTING_VERSION_KEY = "rocketmq.remoting.version";
+
+
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
     private static final int RPC_ONEWAY = 1; // 0, RPC
@@ -69,12 +78,35 @@ public class RemotingCommand {
         }
     }
 
+    /**
+     * 请求操作码，应答方根据不同的请求码进行不同的业务处理，0表示成功，非0则表示各种错误
+     */
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
+
+    /**
+     * 请求方程序的版本
+     */
     private int version = 0;
+
+    /**
+     * 相当于requestId，在同一个连接上的不同请求标识码，与响应消息中的相对应，应答不做修改直接返回
+     */
     private int opaque = requestId.getAndIncrement();
+
+    /**
+     * 区分是普通RPC还是onewayRPC得标志
+     */
     private int flag = 0;
+
+    /**
+     * 传输自定义文本信息
+     */
     private String remark;
+
+    /**
+     * 请求自定义扩展信息
+     */
     private HashMap<String, String> extFields;
     private transient CommandCustomHeader customHeader;
 
@@ -85,6 +117,12 @@ public class RemotingCommand {
     protected RemotingCommand() {
     }
 
+    /**
+     * 创建一个远程请求体
+     * @param code 请求 code
+     * @param customHeader 请求头
+     * @return
+     */
     public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.setCode(code);
@@ -325,6 +363,10 @@ public class RemotingCommand {
         return name;
     }
 
+    /**
+     * 没用
+     * @return
+     */
     public ByteBuffer encode() {
         // 1> header length size
         int length = 4;
@@ -400,6 +442,11 @@ public class RemotingCommand {
         return encodeHeader(this.body != null ? this.body.length : 0);
     }
 
+    /**
+     * 请求头进行编码
+     * @param bodyLength
+     * @return
+     */
     public ByteBuffer encodeHeader(final int bodyLength) {
         // 1> header length size
         int length = 4;

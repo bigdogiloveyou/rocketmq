@@ -23,11 +23,18 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
+/**
+ * topic 发布信息
+ */
 public class TopicPublishInfo {
     private boolean orderTopic = false;
     private boolean haveTopicRouterInfo = false;
     private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
+
+    /**
+     * topic 路由信息
+     */
     private TopicRouteData topicRouteData;
 
     public boolean isOrderTopic() {

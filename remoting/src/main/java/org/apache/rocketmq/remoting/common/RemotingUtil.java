@@ -90,9 +90,14 @@ public class RemotingUtil {
         return isLinuxPlatform;
     }
 
+    /**
+     * 获取本地地址
+     * @return
+     */
     public static String getLocalAddress() {
         try {
             // Traversal Network interface to get the first non-loopback and non-private address
+            // 这种写法我看到别人写过
             Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
             ArrayList<String> ipv4Result = new ArrayList<String>();
             ArrayList<String> ipv6Result = new ArrayList<String>();

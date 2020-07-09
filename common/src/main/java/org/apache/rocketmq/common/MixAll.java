@@ -148,6 +148,12 @@ public class MixAll {
         return 0;
     }
 
+    /**
+     * 将 str 字符串存储到文件中
+     * @param str 字符串
+     * @param fileName 文件名
+     * @throws IOException
+     */
     public static void string2File(final String str, final String fileName) throws IOException {
 
         String tmpFile = fileName + ".tmp";

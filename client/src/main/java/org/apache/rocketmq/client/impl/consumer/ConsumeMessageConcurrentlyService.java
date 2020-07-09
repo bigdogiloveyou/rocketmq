@@ -237,6 +237,9 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
     }
 
 
+    /**
+     * 清除失效信息
+     */
     private void cleanExpireMsg() {
         Iterator<Map.Entry<MessageQueue, ProcessQueue>> it =
             this.defaultMQPushConsumerImpl.getRebalanceImpl().getProcessQueueTable().entrySet().iterator();
@@ -408,7 +411,9 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                         MessageAccessor.setConsumeStartTimeStamp(msg, String.valueOf(System.currentTimeMillis()));
                     }
                 }
-                status = listener.consumeMessage(Collections.unmodifiableList(msgs), context);
+
+                // 这边就是从 broker 拉取消息后，然后调用自己注册的 listener 进行消费
+                status = listener.consumeMessage(Collections.unmodifiableList(msgs), context); // 王八蛋，找到了
             } catch (Throwable e) {
                 log.warn("consumeMessage exception: {} Group: {} Msgs: {} MQ: {}",
                     RemotingHelper.exceptionSimpleDesc(e),

@@ -187,6 +187,8 @@ public class ClientConfig {
     /**
      * Domain name mode access way does not support the delimiter(;), and only one domain name can be set.
      *
+     * namesrvAddr 并不是被 ";" 分割，所以只能设置一个地址
+     *
      * @param namesrvAddr name server address
      */
     public void setNamesrvAddr(String namesrvAddr) {

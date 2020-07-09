@@ -27,9 +27,16 @@ import org.apache.rocketmq.common.ServiceThread;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.common.utils.ThreadUtils;
 
+/**
+ * 拉取消息
+ */
 public class PullMessageService extends ServiceThread {
     private final InternalLogger log = ClientLogger.getLog();
+
+
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
+
+
     private final MQClientInstance mQClientFactory;
     private final ScheduledExecutorService scheduledExecutorService = Executors
         .newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -86,6 +93,10 @@ public class PullMessageService extends ServiceThread {
         }
     }
 
+
+    /**
+     * 这边应该是从 request queue 中拉取信息
+     */
     @Override
     public void run() {
         log.info(this.getServiceName() + " service started");

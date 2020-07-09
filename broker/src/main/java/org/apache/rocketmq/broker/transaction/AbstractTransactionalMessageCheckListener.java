@@ -33,6 +33,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 抽象事务消息检查 listener
+ */
 public abstract class AbstractTransactionalMessageCheckListener {
     private static final InternalLogger LOGGER = InternalLoggerFactory.getLogger(LoggerName.TRANSACTION_LOGGER_NAME);
 

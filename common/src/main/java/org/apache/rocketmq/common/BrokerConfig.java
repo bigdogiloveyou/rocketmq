@@ -25,6 +25,10 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 
+
+/**
+ * broker 配置，主要看成员变量，其他 set/get 方法可以忽略
+ */
 public class BrokerConfig {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 

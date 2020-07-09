@@ -32,6 +32,9 @@ import org.apache.rocketmq.common.utils.HttpTinyClient;
 public class TopAddressing {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
+    /**
+     * nameserver 地址
+     */
     private String nsAddr;
     private String wsAddr;
     private String unitName;
@@ -60,10 +63,22 @@ public class TopAddressing {
         return newString;
     }
 
+
+    /**
+     * 获取 nameserver 地址
+     * @return
+     */
     public final String fetchNSAddr() {
         return fetchNSAddr(true, 3000);
     }
 
+
+    /**
+     * 获取 nameserver 地址
+     * @param verbose
+     * @param timeoutMills 超时时间
+     * @return
+     */
     public final String fetchNSAddr(boolean verbose, long timeoutMills) {
         String url = this.wsAddr;
         try {

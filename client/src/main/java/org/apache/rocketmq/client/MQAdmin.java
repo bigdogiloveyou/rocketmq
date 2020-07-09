@@ -24,6 +24,8 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 
 /**
  * Base interface for MQ management
+ *
+ * MQ 管理的共同接口
  */
 public interface MQAdmin {
     /**

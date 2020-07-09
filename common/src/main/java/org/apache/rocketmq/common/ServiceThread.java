@@ -22,6 +22,9 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 服务线程，基本上所有需要线程的地方都可以继承此类，此类
+ */
 public abstract class ServiceThread implements Runnable {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
@@ -42,6 +45,9 @@ public abstract class ServiceThread implements Runnable {
 
     public abstract String getServiceName();
 
+    /**
+     * 启动线程
+     */
     public void start() {
         log.info("Try to start service thread:{} started:{} lastThread:{}", getServiceName(), started.get(), thread);
         if (!started.compareAndSet(false, true)) {

@@ -20,6 +20,8 @@ import org.apache.rocketmq.common.message.MessageQueue;
 
 /**
  * Consumer Orderly consumption context
+ *
+ * 消费者有序消费 context
  */
 public class ConsumeOrderlyContext {
     private final MessageQueue messageQueue;

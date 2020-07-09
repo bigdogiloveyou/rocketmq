@@ -41,6 +41,9 @@ public class KVConfigManager {
         this.namesrvController = namesrvController;
     }
 
+    /**
+     * 加载 kv 配置管理器，文件地址：userHome/namesrv/kvConfig.json
+     */
     public void load() {
         String content = null;
         try {
@@ -169,6 +172,9 @@ public class KVConfigManager {
         return null;
     }
 
+    /**
+     * 打印所有配置
+     */
     public void printAllPeriodically() {
         try {
             this.lock.readLock().lockInterruptibly();

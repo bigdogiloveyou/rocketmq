@@ -29,6 +29,9 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 存储统计服务
+ */
 public class StoreStatsService extends ServiceThread {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
@@ -444,6 +447,10 @@ public class StoreStatsService extends ServiceThread {
         return result;
     }
 
+    /**
+     * 线程运行
+     */
+    @Override
     public void run() {
         log.info(this.getServiceName() + " service started");
 

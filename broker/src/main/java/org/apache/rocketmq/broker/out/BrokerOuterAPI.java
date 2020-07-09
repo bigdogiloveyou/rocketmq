@@ -84,6 +84,10 @@ public class BrokerOuterAPI {
         this.brokerOuterExecutor.shutdown();
     }
 
+    /**
+     * 获取 nameserver 地址
+     * @return
+     */
     public String fetchNameServerAddr() {
         try {
             String addrs = this.topAddressing.fetchNSAddr();
@@ -111,6 +115,20 @@ public class BrokerOuterAPI {
         this.remotingClient.updateNameServerAddressList(lst);
     }
 
+    /**
+     * broker 向每一个 nameserver 都注册自己，那么每一个 nameserver 都会保存集群完整的路由信息
+     * @param clusterName 机器名称
+     * @param brokerAddr broker 地址
+     * @param brokerName broker 名称
+     * @param brokerId broker id
+     * @param haServerAddr 高可用服务地址
+     * @param topicConfigWrapper 主题配置包装器
+     * @param filterServerList 过滤服务器地址
+     * @param oneway 是否是只管发送
+     * @param timeoutMills 超时时间
+     * @param compressed 是否压缩
+     * @return
+     */
     public List<RegisterBrokerResult> registerBrokerAll(
         final String clusterName,
         final String brokerAddr,
@@ -124,6 +142,8 @@ public class BrokerOuterAPI {
         final boolean compressed) {
 
         final List<RegisterBrokerResult> registerBrokerResultList = Lists.newArrayList();
+
+        // 获取所有 nameserver 地址，构造请求头请求体，循环每一个 nameserver，然后注册自己
         List<String> nameServerAddressList = this.remotingClient.getNameServerAddressList();
         if (nameServerAddressList != null && nameServerAddressList.size() > 0) {
 
@@ -171,6 +191,22 @@ public class BrokerOuterAPI {
         return registerBrokerResultList;
     }
 
+
+    /**
+     * broker 向 nameserver 注册自己
+     * @param namesrvAddr nameserver 地址
+     * @param oneway 是不是只管发
+     * @param timeoutMills 超时时间
+     * @param requestHeader 请求头
+     * @param body 请求题
+     * @return
+     * @throws RemotingCommandException
+     * @throws MQBrokerException
+     * @throws RemotingConnectException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException
+     * @throws InterruptedException
+     */
     private RegisterBrokerResult registerBroker(
         final String namesrvAddr,
         final boolean oneway,
@@ -179,6 +215,7 @@ public class BrokerOuterAPI {
         final byte[] body
     ) throws RemotingCommandException, MQBrokerException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException,
         InterruptedException {
+
         RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.REGISTER_BROKER, requestHeader);
         request.setBody(body);
 

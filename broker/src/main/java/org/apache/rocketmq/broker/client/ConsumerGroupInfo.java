@@ -37,8 +37,14 @@ public class ConsumerGroupInfo {
     private final String groupName;
     private final ConcurrentMap<String/* Topic */, SubscriptionData> subscriptionTable =
         new ConcurrentHashMap<String, SubscriptionData>();
+
+    /**
+     * 将封装后的客户端网络通道信息保存在本地缓存变量
+     */
     private final ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable =
         new ConcurrentHashMap<Channel, ClientChannelInfo>(16);
+
+
     private volatile ConsumeType consumeType;
     private volatile MessageModel messageModel;
     private volatile ConsumeFromWhere consumeFromWhere;

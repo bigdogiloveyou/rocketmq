@@ -53,11 +53,18 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  *
  * <p> <strong>Thread Safety:</strong> After configuring and starting process, this class can be regarded as thread-safe
  * and used among multiple threads context. </p>
+ *
+ * 此类是打算发送消息的应用程序的入口点。
+ * 调整公开 getter/setter 方法的字段是可以的，但是请记住，在大多数情况下，所有字段都应开箱即用。
+ * 此类汇总了各种发送方法，以将消息传递给代理。 每个人都有优点和缺点； 在实际编码之前，您最好了解它们的优缺点。
+ * 线程安全：在配置和启动过程之后，此类可以视为线程安全的，并在多个线程上下文之间使用。
  */
 public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Wrapping internal implementations for virtually all methods presented in this class.
+     *
+     * 实际实现
      */
     protected final transient DefaultMQProducerImpl defaultMQProducerImpl;
     private final InternalLogger log = ClientLogger.getLog();
@@ -67,12 +74,18 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      *
      * For non-transactional messages, it does not matter as long as it's unique per process. </p>
      *
+     *
+     * 生产者组在概念上聚合了角色完全相同的所有生产者实例，这在涉及事务性消息时尤其重要。
+     * 对于非事务性消息，只要它在每个进程中都是唯一的，就没有关系。
+     *
      * See {@linktourl http://rocketmq.apache.org/docs/core-concept/} for more discussion.
      */
     private String producerGroup;
 
     /**
      * Just for testing or demo program
+     *
+     * 只是测试程序？实际生产怎么写呢？
      */
     private String createTopicKey = MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC;
 
@@ -88,6 +101,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Compress message body threshold, namely, message body larger than 4k will be compressed on default.
+     *
+     * 压缩消息正文阈值，即大于4k的消息正文默认情况下将被压缩。
      */
     private int compressMsgBodyOverHowmuch = 1024 * 4;
 
@@ -107,6 +122,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Indicate whether to retry another broker on sending failure internally.
+     *
+     * 失败是否尝试其他 broker
      */
     private boolean retryAnotherBrokerWhenNotStoreOK = false;
 
@@ -117,6 +134,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Interface of asynchronous transfer data
+     *
+     * 异步传输数据接口
      */
     private TraceDispatcher traceDispatcher = null;
 
@@ -307,6 +326,9 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * <strong>Warn:</strong> this method has internal retry-mechanism, that is, internal implementation will retry
      * {@link #retryTimesWhenSendFailed} times before claiming failure. As a result, multiple messages may potentially
      * delivered to broker(s). It's up to the application developers to resolve potential duplication issue.
+     *
+     * 以同步的方式发送信息，只有消息真的发到了 broker 后这个方法才会返回。它内部有自己的失败重试机制，默认是2次。
+     * 所以消息可能会重新发送，我们要自己解决消息重复的问题。（看来是在 consumer 端需要一个表记录全局唯一的 key 防止重复，或者根据业务需求先查询，有则不插入数据库，无则插入消息）
      *
      * @param msg Message to send.
      * @return {@link SendResult} instance to inform senders details of the deliverable, say Message ID of the message,

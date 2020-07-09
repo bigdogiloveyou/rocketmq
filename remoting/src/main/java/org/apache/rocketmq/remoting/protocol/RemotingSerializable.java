@@ -19,6 +19,10 @@ package org.apache.rocketmq.remoting.protocol;
 import com.alibaba.fastjson.JSON;
 import java.nio.charset.Charset;
 
+/**
+ * 远程序列号协议，用的 json。当通过网络发送时，发送的内容其实只是在 body 里，所以消息的 body 是一个 json 字符串还是普通字符串都无所谓。
+ * 整个请求类，会被此 encode 方法变成 json，然后转化为 byte[]。
+ */
 public abstract class RemotingSerializable {
     private final static Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 

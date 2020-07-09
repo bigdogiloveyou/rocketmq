@@ -28,11 +28,16 @@ import org.apache.rocketmq.store.stats.BrokerStatsManager;
 
 /**
  * This class defines contracting interfaces to implement, allowing third-party vendor to use customized message store.
+ *
+ *
+ * 此类定义要实现的合同接口，从而允许第三方供应商使用自定义消息存储。
  */
 public interface MessageStore {
 
     /**
      * Load previously stored messages.
+     *
+     * 加载之前存储的消息
      *
      * @return true if success; false otherwise.
      */
@@ -41,23 +46,31 @@ public interface MessageStore {
     /**
      * Launch this message store.
      *
+     * 启动存储
+     *
      * @throws Exception if there is any error.
      */
     void start() throws Exception;
 
     /**
      * Shutdown this message store.
+     *
+     * 关闭存储
      */
     void shutdown();
 
     /**
      * Destroy this message store. Generally, all persistent files should be removed after invocation.
+     *
+     * 销毁消息存储，所有的持久化文件都被销毁
      */
     void destroy();
 
     /** Store a message into store in async manner, the processor can process the next request
      *  rather than wait for result
      *  when result is completed, notify the client in async manner
+     *
+     *  异步存储消息，完毕后使用回调进行通知
      *
      * @param msg MessageInstance to store
      * @return a CompletableFuture for the result of store operation
@@ -78,6 +91,8 @@ public interface MessageStore {
     /**
      * Store a message into store.
      *
+     * 存储消息
+     *
      * @param msg Message instance to store
      * @return result of store operation.
      */
@@ -94,6 +109,8 @@ public interface MessageStore {
     /**
      * Query at most <code>maxMsgNums</code> messages belonging to <code>topic</code> at <code>queueId</code> starting
      * from given <code>offset</code>. Resulting messages will further be screened using provided message filter.
+     *
+     * 指定 topic、queueId，从 offset 开始查询最多 maxMsgNums 条的消息
      *
      * @param group Consumer group that launches this query.
      * @param topic Topic to query.

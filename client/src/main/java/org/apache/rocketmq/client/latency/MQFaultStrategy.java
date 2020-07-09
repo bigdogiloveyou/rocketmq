@@ -22,6 +22,9 @@ import org.apache.rocketmq.client.log.ClientLogger;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.common.message.MessageQueue;
 
+/***
+ * MQ 出错策略
+ */
 public class MQFaultStrategy {
     private final static InternalLogger log = ClientLogger.getLog();
     private final LatencyFaultTolerance<String> latencyFaultTolerance = new LatencyFaultToleranceImpl();
@@ -55,6 +58,13 @@ public class MQFaultStrategy {
         this.sendLatencyFaultEnable = sendLatencyFaultEnable;
     }
 
+
+    /**
+     * 选择一个消息 queue
+     * @param tpInfo topic 发布信息
+     * @param lastBrokerName 最近的 broker 名称
+     * @return
+     */
     public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
         if (this.sendLatencyFaultEnable) {
             try {

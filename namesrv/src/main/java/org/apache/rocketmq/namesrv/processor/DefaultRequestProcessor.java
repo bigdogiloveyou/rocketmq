@@ -79,6 +79,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
         }
 
 
+        // 处理针对于 broker、consumer、provider 的所有请求
         switch (request.getCode()) {
             case RequestCode.PUT_KV_CONFIG:
                 return this.putKVConfig(ctx, request);

@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.rocketmq.client.common.ThreadLocalIndex;
 
+
+/**
+ * 所谓的"latencyFaultTolerance"，是指对之前失败的，按一定的时间做退避。例如，如果上次请求的latency超过550Lms，就退避3000Lms；
+ * 超过1000L，就退避60000L；
+ * 如果关闭，采用随机递增取模的方式选择一个队列（MessageQueue）来发送消息，latencyFaultTolerance机制是实现消息发送高可用的核心关键所在。
+ */
 public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> {
     private final ConcurrentHashMap<String, FaultItem> faultItemTable = new ConcurrentHashMap<String, FaultItem>(16);
 
@@ -96,9 +102,24 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
             '}';
     }
 
+
+    /**
+     * ❌ 条目
+     */
     class FaultItem implements Comparable<FaultItem> {
+        /**
+         * 名称
+         */
         private final String name;
+
+        /**
+         * 当前延迟
+         */
         private volatile long currentLatency;
+
+        /**
+         * 开始时间
+         */
         private volatile long startTimestamp;
 
         public FaultItem(final String name) {

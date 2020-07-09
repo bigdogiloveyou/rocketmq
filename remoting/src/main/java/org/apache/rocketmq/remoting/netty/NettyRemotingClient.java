@@ -68,6 +68,9 @@ import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 使用 netty 进行远程通信（client）
+ */
 public class NettyRemotingClient extends NettyRemotingAbstract implements RemotingClient {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
 
@@ -77,6 +80,10 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
     private final Lock lockChannelTables = new ReentrantLock();
+
+    /**
+     * <brokerAddress, Channel> 的键值对，就是对应的发送类
+     */
     private final ConcurrentMap<String /* addr */, ChannelWrapper> channelTables = new ConcurrentHashMap<String, ChannelWrapper>();
 
     private final Timer timer = new Timer("ClientHouseKeepingService", true);
@@ -181,10 +188,16 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                     }
                     pipeline.addLast(
                         defaultEventExecutorGroup,
+
+                        // 发送数据进行编码
                         new NettyEncoder(),
+
+                        // 发送数据进行解码
                         new NettyDecoder(),
                         new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()),
                         new NettyConnectManageHandler(),
+
+                        // NettyClientHandler 接收消息
                         new NettyClientHandler());
                 }
             });
@@ -361,16 +374,22 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     @Override
     public RemotingCommand invokeSync(String addr, final RemotingCommand request, long timeoutMillis)
         throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+
         long beginStartTime = System.currentTimeMillis();
         final Channel channel = this.getAndCreateChannel(addr);
         if (channel != null && channel.isActive()) {
             try {
+                // 1、对 request 执行 rpchook
                 doBeforeRpcHooks(addr, request);
                 long costTime = System.currentTimeMillis() - beginStartTime;
                 if (timeoutMillis < costTime) {
                     throw new RemotingTimeoutException("invokeSync call timeout");
                 }
+
+                // 2、执行数据发送逻辑
                 RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis - costTime);
+
+                // 3、对 reponse 执行 rpchook
                 doAfterRpcHooks(RemotingHelper.parseChannelRemoteAddr(channel), request, response);
                 return response;
             } catch (RemotingSendRequestException e) {
@@ -391,6 +410,13 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    /**
+     * 根据地址获取发送 channel
+     * @param addr
+     * @return
+     * @throws RemotingConnectException
+     * @throws InterruptedException
+     */
     private Channel getAndCreateChannel(final String addr) throws RemotingConnectException, InterruptedException {
         if (null == addr) {
             return getAndCreateNameserverChannel();
@@ -404,6 +430,12 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         return this.createChannel(addr);
     }
 
+    /**
+     * 如果 broker 地址为空，则选一个 channel
+     * @return
+     * @throws RemotingConnectException
+     * @throws InterruptedException
+     */
     private Channel getAndCreateNameserverChannel() throws RemotingConnectException, InterruptedException {
         String addr = this.namesrvAddrChoosed.get();
         if (addr != null) {
@@ -450,6 +482,13 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         return null;
     }
 
+
+    /**
+     * 根据 broker 地址或者 channel
+     * @param addr broker 地址
+     * @return
+     * @throws InterruptedException
+     */
     private Channel createChannel(final String addr) throws InterruptedException {
         ChannelWrapper cw = this.channelTables.get(addr);
         if (cw != null && cw.isOK()) {
@@ -591,7 +630,14 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         this.callbackExecutor = callbackExecutor;
     }
 
+
+    /**
+     * channel 包装类
+     */
     static class ChannelWrapper {
+        /**
+         * netty 的 channel
+         */
         private final ChannelFuture channelFuture;
 
         public ChannelWrapper(ChannelFuture channelFuture) {
@@ -615,6 +661,10 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+
+    /**
+     * netty client
+     */
     class NettyClientHandler extends SimpleChannelInboundHandler<RemotingCommand> {
 
         @Override
@@ -623,6 +673,9 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    /**
+     * netty 连接
+     */
     class NettyConnectManageHandler extends ChannelDuplexHandler {
         @Override
         public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress,

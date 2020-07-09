@@ -57,6 +57,9 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.netty.ResponseFuture;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 类似一个 admin，管理创建 topic，获取最大最小 offset 之类的。但是它只是个壳，实际干活的还是 MQClientInstance
+ */
 public class MQAdminImpl {
 
     private final InternalLogger log = ClientLogger.getLog();
@@ -75,10 +78,26 @@ public class MQAdminImpl {
         this.timeoutMillis = timeoutMillis;
     }
 
+    /**
+     * 创建 topic
+     * @param key
+     * @param newTopic
+     * @param queueNum
+     * @throws MQClientException
+     */
     public void createTopic(String key, String newTopic, int queueNum) throws MQClientException {
         createTopic(key, newTopic, queueNum, 0);
     }
 
+
+    /**
+     * 创建 topic
+     * @param key
+     * @param newTopic
+     * @param queueNum
+     * @param topicSysFlag
+     * @throws MQClientException
+     */
     public void createTopic(String key, String newTopic, int queueNum, int topicSysFlag) throws MQClientException {
         try {
             Validators.checkTopic(newTopic);

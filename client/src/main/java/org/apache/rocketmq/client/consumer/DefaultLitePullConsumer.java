@@ -32,6 +32,9 @@ import org.apache.rocketmq.common.protocol.NamespaceUtil;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.remoting.RPCHook;
 
+/**
+ * 现在 MQ 的 consumer 就两个，一个是 DefaultMQPushConsumer，另一个是 DefaultLitePullConsumer
+ */
 public class DefaultLitePullConsumer extends ClientConfig implements LitePullConsumer {
 
     private final DefaultLitePullConsumerImpl defaultLitePullConsumerImpl;

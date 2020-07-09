@@ -36,7 +36,7 @@ public class Consumer {
          * Instantiate with specified consumer group name.
          */
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("please_rename_unique_group_name_4");
-
+        consumer.setNamesrvAddr("localhost:9876");
         /*
          * Specify name server addresses.
          * <p/>
@@ -57,7 +57,7 @@ public class Consumer {
         /*
          * Subscribe one more more topics to consume.
          */
-        consumer.subscribe("TopicTest", "*");
+        consumer.subscribe("TopicTest", "TagA");
 
         /*
          *  Register callback to execute on arrival of messages fetched from brokers.
@@ -67,7 +67,9 @@ public class Consumer {
             @Override
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
                 ConsumeConcurrentlyContext context) {
-                System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msgs);
+//                System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), new String(msgs.get(0).getBody()));
+
+                System.out.println(new String(msgs.get(0).getBody()));
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }
         });
@@ -76,6 +78,7 @@ public class Consumer {
          *  Launch the consumer instance.
          */
         consumer.start();
+
 
         System.out.printf("Consumer Started.%n");
     }

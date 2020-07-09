@@ -55,6 +55,10 @@ public class CommitLog {
     protected final static int BLANK_MAGIC_CODE = -875286124;
     protected final MappedFileQueue mappedFileQueue;
     protected final DefaultMessageStore defaultMessageStore;
+
+    /**
+     * 刷新 commitlog 服务
+     */
     private final FlushCommitLogService flushCommitLogService;
 
     //If TransientStorePool enabled, we must flush message to FileChannel at fixed periods
@@ -93,12 +97,19 @@ public class CommitLog {
 
     }
 
+    /**
+     * 加载 commit log
+     * @return
+     */
     public boolean load() {
         boolean result = this.mappedFileQueue.load();
         log.info("load commit log " + (result ? "OK" : "Failed"));
         return result;
     }
 
+    /**
+     * 启动 commit log
+     */
     public void start() {
         this.flushCommitLogService.start();
 
@@ -1282,10 +1293,18 @@ public class CommitLog {
         }
     }
 
+
+    /**
+     * 刷新 commitlog
+     */
     class FlushRealTimeService extends FlushCommitLogService {
         private long lastFlushTimestamp = 0;
         private long printTimes = 0;
 
+
+        /**
+         * 线程运行
+         */
         public void run() {
             CommitLog.log.info(this.getServiceName() + " service started");
 

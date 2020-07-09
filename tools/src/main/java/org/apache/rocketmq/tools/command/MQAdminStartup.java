@@ -80,6 +80,10 @@ import org.apache.rocketmq.tools.command.topic.UpdateTopicPermSubCommand;
 import org.apache.rocketmq.tools.command.topic.UpdateTopicSubCommand;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * mq 检测平台，按照此类的意思，应该是在命令行控制台接收参数进行相应的信息显示
+ */
 public class MQAdminStartup {
     protected static List<SubCommand> subCommandList = new ArrayList<SubCommand>();
 

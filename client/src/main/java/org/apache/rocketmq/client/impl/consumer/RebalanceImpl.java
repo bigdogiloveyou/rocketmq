@@ -40,16 +40,34 @@ import org.apache.rocketmq.common.protocol.heartbeat.ConsumeType;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
 
+/**
+ * 负载均衡基类，
+ * 消息消费队列在同一消费组不同消费者之间的负载均衡，其核心设计理念是在一个消息消费队列在同一时间只允许被同一消费组内的一个消费者消费，
+ * 一个消息消费者能同时消费多个消息队列。
+ */
 public abstract class RebalanceImpl {
     protected static final InternalLogger log = ClientLogger.getLog();
     protected final ConcurrentMap<MessageQueue, ProcessQueue> processQueueTable = new ConcurrentHashMap<MessageQueue, ProcessQueue>(64);
+
+
+    /**
+     * 该Topic主题下的消息消费队列集合（mqSet）
+     */
     protected final ConcurrentMap<String/* topic */, Set<MessageQueue>> topicSubscribeInfoTable =
         new ConcurrentHashMap<String, Set<MessageQueue>>();
+
+
+    /**
+     * 该 topic 主题下的 topic 以及 tag
+     */
     protected final ConcurrentMap<String /* topic */, SubscriptionData> subscriptionInner =
         new ConcurrentHashMap<String, SubscriptionData>();
+
     protected String consumerGroup;
     protected MessageModel messageModel;
     protected AllocateMessageQueueStrategy allocateMessageQueueStrategy;
+
+
     protected MQClientInstance mQClientFactory;
 
     public RebalanceImpl(String consumerGroup, MessageModel messageModel,
@@ -213,6 +231,11 @@ public abstract class RebalanceImpl {
         }
     }
 
+
+    /**
+     * 负载均衡
+     * @param isOrder 是否是顺序消息
+     */
     public void doRebalance(final boolean isOrder) {
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
         if (subTable != null) {
@@ -235,8 +258,16 @@ public abstract class RebalanceImpl {
         return subscriptionInner;
     }
 
+
+    /**
+     * 根据 topic 进行负载均衡
+     * @param topic 主题
+     * @param isOrder 是否为 order 消息
+     */
     private void rebalanceByTopic(final String topic, final boolean isOrder) {
         switch (messageModel) {
+
+            // 广播模式
             case BROADCASTING: {
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 if (mqSet != null) {
@@ -254,8 +285,17 @@ public abstract class RebalanceImpl {
                 }
                 break;
             }
+
+            // 集群模式
+            // 先对Topic下的消息消费队列、消费者Id排序（注意，是每一个 topic 下的 messageQueue，consumer），
+            // 然后用消息队列分配策略算法（默认为：消息队列的平均分配算法），
+            // 计算出待拉取的消息队列。这里的平均分配算法，类似于分页的算法，将所有MessageQueue排好序类似于记录，
+            // 将所有消费端Consumer排好序类似页数，并求出每一页需要包含的平均size和每个页面记录的范围range，
+            // 最后遍历整个range而计算出当前Consumer端应该分配到的记录（这里即为：MessageQueue）。
             case CLUSTERING: {
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
+
+                // 向Broker端发送获取该消费组下消费者Id列表的RPC通信请求
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
                     if (!topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {
@@ -278,6 +318,7 @@ public abstract class RebalanceImpl {
 
                     List<MessageQueue> allocateResult = null;
                     try {
+                        // 获取此 consumerID 下的 messageQueue
                         allocateResult = strategy.allocate(
                             this.consumerGroup,
                             this.mQClientFactory.getClientId(),
@@ -294,6 +335,7 @@ public abstract class RebalanceImpl {
                         allocateResultSet.addAll(allocateResult);
                     }
 
+                    // 更新此 consumer 下某一个 topic 的 massageQueue
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, allocateResultSet, isOrder);
                     if (changed) {
                         log.info(
@@ -310,6 +352,9 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 截断非本 topic 的消息 queue
+     */
     private void truncateMessageQueueNotMyTopic() {
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
 
@@ -325,6 +370,14 @@ public abstract class RebalanceImpl {
         }
     }
 
+
+    /**
+     *
+     * @param topic 主题
+     * @param mqSet mq 队列
+     * @param isOrder 顺序消息
+     * @return
+     */
     private boolean updateProcessQueueTableInRebalance(final String topic, final Set<MessageQueue> mqSet,
         final boolean isOrder) {
         boolean changed = false;

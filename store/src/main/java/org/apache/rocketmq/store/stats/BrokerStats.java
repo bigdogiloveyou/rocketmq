@@ -21,6 +21,10 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.store.DefaultMessageStore;
 
+
+/**
+ * broker 统计
+ */
 public class BrokerStats {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
 
@@ -38,6 +42,9 @@ public class BrokerStats {
         this.defaultMessageStore = defaultMessageStore;
     }
 
+    /**
+     * 记录一下昨天 put/get 的消息总数
+     */
     public void record() {
         this.msgPutTotalYesterdayMorning = this.msgPutTotalTodayMorning;
         this.msgGetTotalYesterdayMorning = this.msgGetTotalTodayMorning;

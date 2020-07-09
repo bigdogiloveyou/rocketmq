@@ -25,12 +25,26 @@ import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.netty.NettyRequestProcessor;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * remotingClient 接口类
+ */
 public interface RemotingClient extends RemotingService {
 
     void updateNameServerAddressList(final List<String> addrs);
 
     List<String> getNameServerAddressList();
 
+    /**
+     * 使用同步的方式发送数据
+     * @param addr broker 地址
+     * @param request 请求体
+     * @param timeoutMillis 超时时间
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingConnectException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException
+     */
     RemotingCommand invokeSync(final String addr, final RemotingCommand request,
         final long timeoutMillis) throws InterruptedException, RemotingConnectException,
         RemotingSendRequestException, RemotingTimeoutException;

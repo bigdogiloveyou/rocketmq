@@ -63,6 +63,10 @@ import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+
+/**
+ * 使用 netty 进行远程通信（server）
+ */
 public class NettyRemotingServer extends NettyRemotingAbstract implements RemotingServer {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private final ServerBootstrap serverBootstrap;
@@ -349,6 +353,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         serverHandler = new NettyServerHandler();
     }
 
+    /**
+     * 握手处理
+     */
     @ChannelHandler.Sharable
     class HandshakeHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
@@ -412,6 +419,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    /**
+     * 服务器 handler。具体用法见 netty-exmaple hello world
+     */
     @ChannelHandler.Sharable
     class NettyServerHandler extends SimpleChannelInboundHandler<RemotingCommand> {
 
@@ -421,6 +431,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    /**
+     * 连接管理 handler
+     */
     @ChannelHandler.Sharable
     class NettyConnectManageHandler extends ChannelDuplexHandler {
         @Override

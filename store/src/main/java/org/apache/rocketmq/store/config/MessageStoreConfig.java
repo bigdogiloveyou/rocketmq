@@ -20,8 +20,12 @@ import java.io.File;
 import org.apache.rocketmq.common.annotation.ImportantField;
 import org.apache.rocketmq.store.ConsumeQueue;
 
+/**
+ * 消息存储配置，忽略 set/get 方法
+ */
 public class MessageStoreConfig {
     //The root directory in which the log data is kept
+    // 默认是 userhome/store
     @ImportantField
     private String storePathRootDir = System.getProperty("user.home") + File.separator + "store";
 
